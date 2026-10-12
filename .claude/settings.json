@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 harness/tools/measure.py:*)"
+    ]
+  }
+}

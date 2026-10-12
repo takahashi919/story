@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>__TITLE__</title>
+<style>
+:root{
+  --bg:#f6f5f2; --card:#ffffff; --ink:#1c1b1a; --sub:#6a6761; --line:#dcd9d2;
+  --accent:#1f5f8b; --accent-ink:#ffffff; --ok:#2f7d4f; --rec:#b7791f; --soft:#eef3f7;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#17171a; --card:#212126; --ink:#ecebe8; --sub:#a09d96; --line:#3a3a42;
+    --accent:#5aa3d6; --accent-ink:#0d1a24; --ok:#62c08a; --rec:#e0b055; --soft:#262c33; }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.7 system-ui,-apple-system,"Hiragino Sans","Noto Sans JP",sans-serif}
+header{padding:20px 16px 8px;max-width:820px;margin:0 auto}
+h1{font-size:20px;margin:0 0 6px}
+h2{font-size:17px;margin:28px 0 10px;padding-top:6px;border-top:1px solid var(--line)}
+.lead{color:var(--sub);font-size:14px;margin:0}
+main{max-width:820px;margin:0 auto;padding:0 16px 220px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 14px 12px;margin:12px 0}
+.card.done{border-color:var(--ok)}
+.q{font-weight:700;margin:0 0 2px}
+.ctx{color:var(--sub);font-size:14px;margin:0 0 10px}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opt{border:1px solid var(--line);border-radius:10px;background:transparent;color:inherit;text-align:left;padding:10px 12px;cursor:pointer;font:inherit;width:100%}
+.opt:hover{background:var(--soft)}
+.opt[aria-pressed="true"]{border-color:var(--accent);background:var(--soft);box-shadow:inset 0 0 0 1px var(--accent)}
+.opt .t{font-weight:600}
+.opt .d{display:block;color:var(--sub);font-size:14px;margin-top:2px}
+.opt .s{display:block;font-size:14px;margin-top:6px;padding:8px 10px;border-left:3px solid var(--line);background:var(--bg);white-space:pre-wrap}
+.tag{display:inline-block;font-size:12px;border-radius:99px;padding:0 8px;margin-left:6px;vertical-align:1px}
+.tag.rec{background:var(--rec);color:#1a1200}
+.memo{width:100%;margin-top:8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:inherit;padding:8px;font:inherit;font-size:14px;min-height:38px}
+.bar{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:10px 16px;z-index:5}
+.bar .in{max-width:820px;margin:0 auto}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{border:1px solid var(--line);background:var(--card);color:inherit;border-radius:10px;padding:8px 14px;cursor:pointer;font:inherit}
+.btn.main{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:700}
+.prog{font-size:14px;color:var(--sub);margin-right:auto}
+#out{width:100%;height:96px;margin-top:8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:inherit;padding:8px;font:13px/1.5 ui-monospace,Menlo,monospace}
+.note{font-size:13px;color:var(--sub);margin:6px 0 0}
+</style>
+</head>
+<body>
+<header>
+  <h1>__TITLE__</h1>
+  <p class="lead">__LEAD__</p>
+</header>
+<main id="root"></main>
+
+<div class="bar"><div class="in">
+  <div class="row">
+    <span class="prog" id="prog"></span>
+    <button class="btn" id="btnRec">未選択を推奨で埋める</button>
+    <button class="btn" id="btnClear">全部クリア</button>
+    <button class="btn main" id="btnCopy">結果をコピー</button>
+  </div>
+  <textarea id="out" readonly placeholder="ここに結果が出ます。コピーできない場合は、ここを全選択して貼ってください。"></textarea>
+  <p class="note" id="msg"></p>
+</div></div>
+
+<script>
+const SECTIONS = __SECTIONS_JSON__;
+
+const STORE='__STORE_KEY__';
+let state={};
+try{ state=JSON.parse(localStorage.getItem(STORE)||'{}'); }catch(e){ state={}; }
+function save(){ try{ localStorage.setItem(STORE, JSON.stringify(state)); }catch(e){} }
+const items=SECTIONS.flatMap(s=>s.items);
+
+function el(tag,attrs,...kids){
+  const e=document.createElement(tag);
+  for(const k in (attrs||{})){
+    if(k==='class') e.className=attrs[k];
+    else if(k.startsWith('on')) e.addEventListener(k.slice(2),attrs[k]);
+    else e.setAttribute(k,attrs[k]);
+  }
+  for(const c of kids){ if(c==null) continue; e.append(c.nodeType?c:document.createTextNode(c)); }
+  return e;
+}
+
+function render(){
+  const root=document.getElementById('root'); root.innerHTML='';
+  for(const sec of SECTIONS){
+    root.append(el('h2',{},sec.title));
+    for(const it of sec.items){
+      const st=state[it.id]||{};
+      const card=el('div',{class:'card'+(st.k?' done':'')});
+      card.append(el('p',{class:'q'},it.q), el('p',{class:'ctx'},it.ctx||''));
+      const opts=el('div',{class:'opts'});
+      for(const o of it.opts){
+        const b=el('button',{class:'opt','aria-pressed':String(st.k===o.k),type:'button',onclick:()=>{
+          state[it.id]=state[it.id]||{};
+          state[it.id].k = (state[it.id].k===o.k)?null:o.k;
+          save(); render(); update();
+        }});
+        const t=el('span',{class:'t'},o.t);
+        if(o.rec) t.append(el('span',{class:'tag rec'},'推奨'));
+        b.append(t);
+        if(o.d) b.append(el('span',{class:'d'},o.d));
+        if(o.s) b.append(el('span',{class:'s'},o.s));
+        opts.append(b);
+      }
+      card.append(opts);
+      const memo=el('textarea',{class:'memo',placeholder:'メモ（任意。例：この案の「〜」だけ採用、など）'});
+      memo.value=st.m||'';
+      memo.addEventListener('input',()=>{ state[it.id]=state[it.id]||{}; state[it.id].m=memo.value; save(); update(); });
+      card.append(memo);
+      root.append(card);
+    }
+  }
+}
+
+function labelOf(it,k){ const o=it.opts.find(x=>x.k===k); return o?o.t:'(未選択)'; }
+function result(){
+  const lines=['__RESULT_HEAD__'];
+  for(const sec of SECTIONS){
+    lines.push('', '■ '+sec.title);
+    for(const it of sec.items){
+      const st=state[it.id]||{};
+      let line=it.id+'：'+(st.k?labelOf(it,st.k):'(未選択)');
+      if(st.m && st.m.trim()) line+='　メモ：'+st.m.trim().replace(/\n/g,' ');
+      lines.push(line);
+    }
+  }
+  return lines.join('\n');
+}
+function update(){
+  const done=items.filter(i=>state[i.id]&&state[i.id].k).length;
+  document.getElementById('prog').textContent='選択済み '+done+' / '+items.length;
+  document.getElementById('out').value=result();
+  document.querySelectorAll('.card').forEach((c,i)=>{});
+}
+document.getElementById('btnRec').addEventListener('click',()=>{
+  for(const it of items){
+    const st=state[it.id]=state[it.id]||{};
+    if(!st.k){ const r=it.opts.find(o=>o.rec); if(r) st.k=r.k; }
+  }
+  save(); render(); update();
+});
+document.getElementById('btnClear').addEventListener('click',()=>{
+  if(!confirm('選択とメモをすべて消します。よろしいですか？')) return;
+  state={}; save(); render(); update();
+});
+document.getElementById('btnCopy').addEventListener('click',async()=>{
+  const out=document.getElementById('out'); const msg=document.getElementById('msg');
+  out.value=result();
+  try{
+    await navigator.clipboard.writeText(out.value);
+    msg.textContent='コピーしました。チャットに貼ってください。';
+  }catch(e){
+    out.removeAttribute('readonly'); out.focus(); out.select();
+    msg.textContent='自動コピーできませんでした。選択済みの文字を、コピーして貼ってください。';
+  }
+});
+render(); update();
+</script>
+</body>
+</html>

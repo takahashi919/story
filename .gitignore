@@ -1,0 +1,6 @@
+video/*/slides/
+video/*/audio/
+video/*/_build/
+video/*/subs.ass
+video/**/*.mp4
+__pycache__/

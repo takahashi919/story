@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(python3 harness/tools/measure.py:*)"
+      "Bash(python3 harness/tools/measure.py:*)",
+      "Bash(python3 harness/tools/weather.py:*)"
     ]
   }
 }

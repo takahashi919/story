@@ -27,6 +27,12 @@
 - 距離: その点からのずれ（揺れ幅の何倍か）。参考作家自身の4,500字の塊の 90% はこの値に収まる
   （JSON の distance_p90）。それを超えたら、配合では説明できない ＝ どちらの作家にも似ていない。
 - 1,500字未満の場面の配合は揺れが大きいので参考扱い。
+
+視点の印:
+- 場面の頭に <!-- 視点: 一人称 --> や <!-- 視点: 三人称（スメラギ） --> と書くと、場面の視点として読む。
+  印は場面ごとに書く（引き継がない）。印のない場面は「未指定」で、比較からも外れる。
+- 印があれば視点ごとの字数の配分を出し、--compare は「一人称」の場面だけを参考作家と比べる
+  （参考文章は2作とも一人称なので、三人称の場面を混ぜると比べものにならない）。
 """
 import json
 import re
@@ -38,23 +44,38 @@ SCENE_MARKERS = ("---", "＊＊＊", "◇")
 SHORT_SCENE = 1500
 
 
-def paragraphs(text: str) -> list[list[str]]:
-    """場面ごとの段落リスト（空白は除去済み）。場面の区切りは ---・＊＊＊・◇。"""
+POV_MARK = "\x00視点:"
+FIRST_PERSON = "一人称"
+
+
+def scenes(text: str) -> list[tuple[str, list[str]]]:
+    """（視点, 段落リスト）の場面ごとのリスト。段落の空白は除去済み。場面の区切りは ---・＊＊＊・◇。"""
+    text = re.sub(r"<!--\s*視点\s*[:：]\s*(.*?)\s*-->", lambda mo: f"\n{POV_MARK}{mo.group(1)}\n", text)
     text = re.sub(r"<!--.*?-->", "", text, flags=re.S)
-    scenes, cur = [], []
+    out, cur, pov = [], [], ""
     for line in text.splitlines():
         s = line.strip()
+        if s.startswith(POV_MARK):
+            pov = s[len(POV_MARK):]
+            continue
         if s in SCENE_MARKERS:
             if cur:
-                scenes.append(cur)
-            cur = []
+                out.append((cur_pov, cur))
+            # 視点は場面ごとに書く。引き継ぐと、印を書き忘れた一人称の場面が三人称として数えられる
+            cur, pov = [], ""
             continue
         if not s or s.startswith("#"):
             continue
+        if not cur:
+            cur_pov = pov  # 場面の視点は、最初の段落の時点の印で決める
         cur.append(re.sub(r"\s", "", s))
     if cur:
-        scenes.append(cur)
-    return scenes
+        out.append((cur_pov, cur))
+    return out
+
+
+def paragraphs(text: str) -> list[list[str]]:
+    return [ps for _, ps in scenes(text)]
 
 
 def metrics(paras: list[str]) -> dict:
@@ -88,8 +109,28 @@ def metrics(paras: list[str]) -> dict:
 
 
 def measure(path: Path) -> dict:
-    scenes = paragraphs(path.read_text(encoding="utf-8"))
-    return {"file": str(path), **metrics([p for s in scenes for p in s])}
+    scs = scenes(path.read_text(encoding="utf-8"))
+    return {"file": str(path), **metrics([p for _, ps in scs for p in ps])}
+
+
+def pov_split(path: Path) -> dict[str, int]:
+    """視点ごとの字数。視点の印が一つもなければ空。"""
+    scs = scenes(path.read_text(encoding="utf-8"))
+    if not any(pov for pov, _ in scs):
+        return {}
+    split: dict[str, int] = {}
+    for pov, ps in scs:
+        split[pov or "未指定"] = split.get(pov or "未指定", 0) + sum(len(p) for p in ps)
+    return split
+
+
+def first_person(path: Path) -> list[str]:
+    return [p for pov, ps in scenes(path.read_text(encoding="utf-8")) if pov.startswith(FIRST_PERSON) for p in ps]
+
+
+def split_note(split: dict[str, int]) -> str:
+    total = sum(split.values())
+    return "視点の配分  " + " / ".join(f"{k} {v}字（{round(v * 100 / total)}%）" for k, v in split.items())
 
 
 def load_profile() -> dict:
@@ -169,12 +210,28 @@ def distance_note(d: float, prof: dict) -> str:
     return f"距離 {d}（{p90} を超える ＝ どちらの作家にも似ていない指標がある）"
 
 
-def print_compare(m: dict, prof: dict) -> None:
-    c = compare(m, prof)
-    b = c["配合"]
+def compare_target(path: Path, m: dict) -> tuple[dict, str]:
+    """比べる本文の数値と、その説明。視点の印があれば一人称の場面だけ。"""
+    if not pov_split(path):
+        return m, ""
+    fp = first_person(path)
+    if not fp:
+        return {"字数": 0}, "一人称の場面がないので、参考作家とは比べない"
+    fm = metrics(fp)
+    return fm, f"比べた範囲：一人称の場面だけ（{fm['字数']}字）。三人称の場面は一人称の参考作家と比べない"
+
+
+def print_compare(path: Path, m: dict, prof: dict) -> None:
     lo, hi = prof["字数の目安"]
     if not lo <= m["字数"] <= hi:
         print(f"✕ 字数 {m['字数']} が目安（{lo}〜{hi}）の外")
+    cm, note = compare_target(path, m)
+    if note:
+        print(note)
+    if not cm["字数"]:
+        return
+    c = compare(cm, prof)
+    b = c["配合"]
     print(f"配合推定  孫の手 {b['孫の手']} : 三嶋 {b['三嶋']}   {distance_note(b['距離'], prof)}")
     print(f"  {'指標':<10}{'本文':>8}{'孫の手':>8}{'三嶋':>8}{'旧原稿':>8}  判定")
     for r in c["指標"]:
@@ -184,13 +241,13 @@ def print_compare(m: dict, prof: dict) -> None:
 
 def scene_rows(path: Path, prof: dict) -> list[dict]:
     rows = []
-    for i, sc in enumerate(paragraphs(path.read_text(encoding="utf-8")), 1):
+    for i, (pov, sc) in enumerate(scenes(path.read_text(encoding="utf-8")), 1):
         m = metrics(sc)
         if not m["字数"]:
             continue
         b = blend(m, prof)
-        rows.append({"場面": i, "字数": m["字数"], "書き出し": sc[0][:16], **b,
-                     "参考扱い": m["字数"] < SHORT_SCENE})
+        rows.append({"場面": i, "視点": pov or "未指定", "字数": m["字数"], "書き出し": sc[0][:16], **b,
+                     "参考扱い": m["字数"] < SHORT_SCENE or (bool(pov) and not pov.startswith(FIRST_PERSON))})
     return rows
 
 
@@ -205,21 +262,27 @@ def main(argv: list[str]) -> int:
     for a in files:
         path = Path(a)
         m = measure(path)
+        split = pov_split(path)
         if "--json" in flags:
             out = dict(m)
+            if split:
+                out["視点の配分"] = split
             if "--compare" in flags and m["字数"]:
-                out["比較"] = compare(m, prof)
+                cm, note = compare_target(path, m)
+                out["比較"] = compare(cm, prof) | {"範囲": note or "全体"} if cm["字数"] else {"範囲": note}
             if "--scenes" in flags:
                 out["場面"] = scene_rows(path, prof)
             print(json.dumps(out, ensure_ascii=False))
             continue
         print("  ".join(f"{k}={v}" for k, v in m.items()))
+        if split:
+            print(split_note(split))
         if "--compare" in flags and m["字数"]:
-            print_compare(m, prof)
+            print_compare(path, m, prof)
         if "--scenes" in flags:
             for r in scene_rows(path, prof):
-                ref = "  ※短いので参考" if r["参考扱い"] else ""
-                print(f"  場面{r['場面']} {r['字数']}字 孫の手 {r['孫の手']} : 三嶋 {r['三嶋']}"
+                ref = "  ※参考（短い、または三人称）" if r["参考扱い"] else ""
+                print(f"  場面{r['場面']} [{r['視点']}] {r['字数']}字 孫の手 {r['孫の手']} : 三嶋 {r['三嶋']}"
                       f"  距離 {r['距離']}  「{r['書き出し']}…」{ref}")
     return 0
 

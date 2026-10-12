@@ -10,8 +10,12 @@
 必要なもの:
 - Chromium（スライドの描画）。環境変数 CHROME で場所を指定できる。なければ PATH と Playwright の場所を探す。
 - ffmpeg / ffprobe（libass 入り）。日本語フォント（Noto Sans/Serif CJK JP 推奨）。
-- 音声：環境変数 FISH_API_KEY（Fish Audio の API キー）。モデルIDは script.json の fish_reference_id。
-  任意で FISH_MODEL（既定 "s1"）。キーがない・通信できない場合は、音声なしのプレビュー（字幕つき）を作る。
+- 音声：Fish Audio の API キー。次のどちらかで渡す。
+  1. クラウド環境の「ネットワークシークレット」に api.fish.audio 向けの Authorization ヘッダとして登録する
+     （キーはセッションの中に現れず、通信の途中で付けられる）。この場合、環境変数は不要。
+  2. 環境変数 FISH_API_KEY（手元のPCで動かす時など）。
+  モデル（音声）は script.json の fish_reference_id。ヘッダの model は環境変数 FISH_MODEL（既定 "s2.1-pro-free"）。
+  通信できない・認証に失敗した場合は、音声なしのプレビュー（字幕つき）を作る。
 
 出力（台本フォルダの中）:
     slides/NN.png  audio/NN.mp3  subs.ass  解説.mp4（音声あり）または 解説_プレビュー無音.mp4
@@ -23,6 +27,7 @@ import re
 import shutil
 import subprocess
 import sys
+import urllib.error
 import urllib.request
 from pathlib import Path
 
@@ -117,10 +122,7 @@ def tts_text(text: str, readings: dict) -> str:
 
 
 def synth(d: Path, script: dict) -> bool:
-    key = os.environ.get("FISH_API_KEY")
-    if not key:
-        print("FISH_API_KEY が未設定。音声は作らず、無音プレビューにします。")
-        return False
+    key = os.environ.get("FISH_API_KEY")  # なければネットワークシークレットで付く前提で送る
     out = d / "audio"
     out.mkdir(exist_ok=True)
     for s in script["scenes"]:
@@ -130,14 +132,18 @@ def synth(d: Path, script: dict) -> bool:
         body = json.dumps({"text": tts_text(s["narration"], script.get("readings", {})),
                            "reference_id": script["fish_reference_id"], "format": "mp3",
                            "normalize": True, "latency": "normal"}).encode()
-        req = urllib.request.Request(FISH_URL, data=body, method="POST", headers={
-            "Authorization": f"Bearer {key}", "Content-Type": "application/json",
-            "model": os.environ.get("FISH_MODEL", "s1")})
+        headers = {"Content-Type": "application/json", "model": os.environ.get("FISH_MODEL", "s2.1-pro-free")}
+        if key:
+            headers["Authorization"] = f"Bearer {key}"
+        req = urllib.request.Request(FISH_URL, data=body, method="POST", headers=headers)
         try:
             with urllib.request.urlopen(req, timeout=180) as r:
                 mp3.write_bytes(r.read())
-        except Exception as ex:  # 通信不可・キー不正など
-            print(f"Fish Audio の呼び出しに失敗（{s['id']}）: {ex}\n無音プレビューに切り替えます。")
+        except urllib.error.HTTPError as ex:  # 401 ならキーが付いていない／不正
+            print(f"Fish Audio がエラーを返した（{s['id']}）: {ex.code} {ex.read()[:300]!r}\n無音プレビューに切り替えます。")
+            return False
+        except Exception as ex:  # 通信不可（許可ドメインに api.fish.audio がない等）
+            print(f"Fish Audio に繋がらない（{s['id']}）: {ex}\n無音プレビューに切り替えます。")
             return False
         print("tts", mp3)
     return True

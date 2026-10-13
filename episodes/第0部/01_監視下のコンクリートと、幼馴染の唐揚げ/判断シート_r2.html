@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第1話 r2 判断シート</title>
+<style>
+:root{
+  --bg:#f6f5f2; --card:#ffffff; --ink:#1c1b1a; --sub:#6a6761; --line:#dcd9d2;
+  --accent:#1f5f8b; --accent-ink:#ffffff; --ok:#2f7d4f; --rec:#b7791f; --soft:#eef3f7;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#17171a; --card:#212126; --ink:#ecebe8; --sub:#a09d96; --line:#3a3a42;
+    --accent:#5aa3d6; --accent-ink:#0d1a24; --ok:#62c08a; --rec:#e0b055; --soft:#262c33; }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.7 system-ui,-apple-system,"Hiragino Sans","Noto Sans JP",sans-serif}
+header{padding:20px 16px 8px;max-width:820px;margin:0 auto}
+h1{font-size:20px;margin:0 0 6px}
+h2{font-size:17px;margin:28px 0 10px;padding-top:6px;border-top:1px solid var(--line)}
+.lead{color:var(--sub);font-size:14px;margin:0}
+main{max-width:820px;margin:0 auto;padding:0 16px 220px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 14px 12px;margin:12px 0}
+.card.done{border-color:var(--ok)}
+.q{font-weight:700;margin:0 0 2px}
+.ctx{color:var(--sub);font-size:14px;margin:0 0 10px}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opt{border:1px solid var(--line);border-radius:10px;background:transparent;color:inherit;text-align:left;padding:10px 12px;cursor:pointer;font:inherit;width:100%}
+.opt:hover{background:var(--soft)}
+.opt[aria-pressed="true"]{border-color:var(--accent);background:var(--soft);box-shadow:inset 0 0 0 1px var(--accent)}
+.opt .t{font-weight:600}
+.opt .d{display:block;color:var(--sub);font-size:14px;margin-top:2px}
+.opt .s{display:block;font-size:14px;margin-top:6px;padding:8px 10px;border-left:3px solid var(--line);background:var(--bg);white-space:pre-wrap}
+.tag{display:inline-block;font-size:12px;border-radius:99px;padding:0 8px;margin-left:6px;vertical-align:1px}
+.tag.rec{background:var(--rec);color:#1a1200}
+.memo{width:100%;margin-top:8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:inherit;padding:8px;font:inherit;font-size:14px;min-height:38px}
+.bar{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:10px 16px;z-index:5}
+.bar .in{max-width:820px;margin:0 auto}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{border:1px solid var(--line);background:var(--card);color:inherit;border-radius:10px;padding:8px 14px;cursor:pointer;font:inherit}
+.btn.main{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:700}
+.prog{font-size:14px;color:var(--sub);margin-right:auto}
+#out{width:100%;height:96px;margin-top:8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:inherit;padding:8px;font:13px/1.5 ui-monospace,Menlo,monospace}
+.note{font-size:13px;color:var(--sub);margin:6px 0 0}
+</style>
+</head>
+<body>
+<header>
+  <h1>第1話 r2 判断シート</h1>
+  <p class="lead">二人の作家の辛口評価(三嶋58点、孫の手64点)を受けた判断です。選択肢を押すと選べます(もう一度押すと取り消し)。推奨は二人の作家の見立てです。下のバーで結果を文字にして、チャットへ貼ってください。メモ欄は自由に使えます。評価の全文は 提案_r2.pdf にあります。文章の読みづらさ(誰が何か不明、隠喩、主語抜けなど24箇所)は、提案どおりに直す前提で、ここでは聞きません。</p>
+</header>
+<main id="root"></main>
+
+<div class="bar"><div class="in">
+  <div class="row">
+    <span class="prog" id="prog"></span>
+    <button class="btn" id="btnRec">未選択を推奨で埋める</button>
+    <button class="btn" id="btnClear">全部クリア</button>
+    <button class="btn main" id="btnCopy">結果をコピー</button>
+  </div>
+  <textarea id="out" readonly placeholder="ここに結果が出ます。コピーできない場合は、ここを全選択して貼ってください。"></textarea>
+  <p class="note" id="msg"></p>
+</div></div>
+
+<script>
+const SECTIONS = [{"title": "A. エリスの攻撃と許可制", "items": [{"id": "A1", "q": "A1　エリスの攻撃を、どう統一するか", "ctx": "第0話の確定本文では、攻撃は『地面が割れて、黒い杭が突き上がる』。結晶は防御で、殺しは『冷たくて、匂いがない』。第1話の研究員は『右腕が、焦げた』で仕組みが分からず別物に見え、しかも『髪を焼いた匂い』は第0話の『匂いがない』と矛盾します。杭は必ず足元(床・地面・壁の継ぎ目)から出て、中空には出ない、は全案共通です。", "opts": [{"k": "B", "t": "孫の手B：杭が立つと同時に、結晶が腕を包んで水分と熱を吸う。焦げずに乾く", "d": "冷たく、匂いがない(第0話と整合)。canon の『炭化』は『黒く乾いて炭のように』で近似できる。結晶に攻撃の機能が加わる。", "s": "エリスの足元の床が割れた。黒い杭が斜めに立つ。同時に、黒い結晶が研究員の右腕を包んだ。袖が内側から白く縮み、皮膚が黒く乾いて紙のように割れた。匂いはなかった。", "rec": true}, {"k": "mishima1", "t": "三嶋案1：杭に触れた生体は水分を失って炭になる", "d": "杭の一系統。ただし『肉の焦げる匂い』は第0話の『匂いがない』と衝突するので、匂いは書かない形にする。", "s": "エリスの足元のコンクリートが割れた。黒い杭が斜めに突き上がり、研究員の右腕をかすめて、天井で止まった。かすめただけだった。杭に触れた袖が、先に縮んだ。"}, {"k": "A", "t": "孫の手A：杭が腕を貫くだけ(血が出る)", "d": "最小の改造。canon の話数表の『炭化』を直す必要がある。"}, {"k": "own", "t": "自案(メモ欄に書く)"}]}, {"id": "A2", "q": "A2　許可制の予備動作(粒を数えるのをやめる)", "ctx": "『粒』は第0話に一度も出ていません。第1話で私が足した語です。数えるのが悠長、という指摘は二人とも同じです。第0話の『勝手にやるな。聞いてから』は保ち、第3話の『合図』は先取りしません。", "opts": [{"k": "crack", "t": "孫の手案：粒を廃止し、割れ目が走る距離を時計にする", "d": "第0話の杭の前兆(『アスファルトが割れる。割れ目は横道の奥へ走る』)と同じ。割れ目が対象の足元に届く前に止める。皇は届いてしまう。陽子は半分届いたところで口が動く。", "s": "床の継ぎ目に黒い粉が浮いた。割れ目が、男の足元へ向かって走る。間に合うか。俺は立った。", "rec": true}, {"k": "ring", "t": "三嶋案P：足元に黒い砂粒が浮いて輪になり、輪が閉じるまでが待ち時間", "d": "輪が閉じる速さは接近者の速さに連動する。『粒』という新しい語を残す。", "s": "皇が三歩目を踏んだ。エリスの足元の継ぎ目に、黒い砂粒が浮いた。砂粒は継ぎ目をたどって、輪を描きはじめる。…輪が閉じた。「応答がありません。待機を終了します」"}, {"k": "q", "t": "三嶋案Q(最小)：『粒が四つ、一息で並んだ』の一文にする"}]}, {"id": "A3", "q": "A3　広間で『待て』が間に合わない理由", "ctx": "今の本文は『数えていて間に合わない』ですが、A2 でそれをやめるので、理由が要ります。", "opts": [{"k": "dist", "t": "距離で間に合わない(割れ目が先に届く)", "d": "A2 で孫の手案を採るなら自然。博之の失敗は、距離の読み違い。", "rec": true}, {"k": "voice", "t": "三嶋案3：喉が泥で貼りついて声が出ない", "d": "第0話で黒い胃液を吐いた後遺症として自然。尋問室の沈黙(声は出るのに答えない)との対比が出る。canon の『代償』に喉の掠れを一度きりの後遺症として足す必要がある。", "s": "待て、と言うつもりだった。喉が泥で貼りついて、息しか出なかった。"}, {"k": "both", "t": "両方(割れ目が速く、さらに声がかすれる)"}]}]}, {"title": "B. 傷と広間の人数", "items": [{"id": "B1", "q": "B1　左腕のしびれ・垂れ・運動低下を削るか", "ctx": "原因の説明がなく、第0話に前例がなく、canon の代償(逆流・嘔吐)とも別物。第1話の博之は力を使っておらず、止めているだけです。二人とも『削る』。削ると、博之の傷は左掌一箇所だけになり、他の傷はすべて他人の傷(皇の右手、研究員の右腕)になります。ログの『左腕：運動低下』も消えます。", "opts": [{"k": "cut", "t": "削る(傷は左掌一箇所に絞る)", "d": "苦難は、手当てを受けられない孤立(救護袋が五歩先に置かれたまま取りに行けない)に移す。", "rec": true}, {"k": "keep", "t": "残す(原因を足す)", "d": "原因をどう足すかは、メモ欄に書いてください。"}]}, {"id": "B2", "q": "B2　広間の人数", "ctx": "今は皇→伝令→報道班の兵→救護袋の男の4人で、同じ型(来る→止める)を4回繰り返しています。二人とも『3回目で読者の目が滑る』。伝令の役割は、受令機が通じないこと(第0話で既出)と痺れの階段(B1で削る)だけで、不要になります。口頭の指示は拡声器に回します。", "opts": [{"k": "three", "t": "3人(皇→報道班の兵→救護袋の男)", "rec": true}, {"k": "four", "t": "4人のまま"}]}, {"id": "B3", "q": "B3　救護袋の男の場面", "ctx": "ご指摘の『危ないから近づくな＋目で礼』です。二人とも同じ案でした。博之の偽悪は皇・撮影兵・研究員に向けて残し、この男にだけ当たりを弱めると、悪ぶっているのに結果的に人を守る二重構造が一場面の中に出ます。", "opts": [{"k": "eye", "t": "博之が先に声を出し、目で礼を言う。男は袋を置いて下がる。袋は拾えない", "d": "礼の言葉も『礼』という語も書かない。袋が夜まで五歩先に置かれたままになる(傷の苦難)。S1 の『追い返した男』は『広間に置かれた救護袋は、五歩先から動かなかった』に。", "s": "「危ない。近づくな」男の足が止まった。目が俺の左手を見て、それから俺の目に上がった。俺は目を逸らさなかった。一度だけ、まばたきを深くした。男は袋を足元に置いて、両手を見せたまま下がった。袋は拾えなかった。", "rec": true}, {"k": "push", "t": "突き飛ばしのまま(「邪魔だ。失せろ」)"}]}]}, {"title": "C. 足すか足さないか", "items": [{"id": "C1", "q": "C1　尋問に『報告書の署名』を足す(三嶋案2)", "ctx": "広間から悪意を抜いたので、博之が理不尽に扱われる場面が第1話からなくなりました(読者のヘイトの溜めが空)。将校が、あの区画の戦果は皇少尉の名で上がっていると告げ、降下の事後報告書への署名を求めます。書面には博之は『遅れて到着』とあります。博之は読まずに署名し、『読んでも変わりません』と言います。博之が自分から手柄を譲る場面になり、S5 の皇の吐き気の理由(嘘への嫌悪)に読者が先に気づけます。約150字増。", "opts": [{"k": "add", "t": "足す", "rec": true}, {"k": "no", "t": "足さない"}]}, {"id": "C2", "q": "C2　隠喩・比喩の方針", "ctx": "二人が『意図的で効いている』と残した表現が2つあります：『餌皿がないだけの飼育場だ』(博之の悪態)と、成瀬の『異物は、見えないほうが長持ちする』(格言。ただし読者が止まる、という指摘つき)。そのほかの擬人・婉曲(『粒が起きた』『目だけが、聞いていた』『そのぶんまで、自分のものになっていた』『石を詰めたような拳』『茹でた肉を焼いたもの』など)は、すべて事実の描写に直します。", "opts": [{"k": "keep2", "t": "意図的な2つは残し、ほかはすべて事実の描写に直す", "d": "『異物は、見えないほうが長持ちする』は『見えなければ、残る』程度に平易にする。", "rec": true}, {"k": "all", "t": "2つも含めて、すべて事実の描写に直す"}]}]}];
+
+const STORE='tz1r2-sheet-v1';
+let state={};
+try{ state=JSON.parse(localStorage.getItem(STORE)||'{}'); }catch(e){ state={}; }
+function save(){ try{ localStorage.setItem(STORE, JSON.stringify(state)); }catch(e){} }
+const items=SECTIONS.flatMap(s=>s.items);
+
+function el(tag,attrs,...kids){
+  const e=document.createElement(tag);
+  for(const k in (attrs||{})){
+    if(k==='class') e.className=attrs[k];
+    else if(k.startsWith('on')) e.addEventListener(k.slice(2),attrs[k]);
+    else e.setAttribute(k,attrs[k]);
+  }
+  for(const c of kids){ if(c==null) continue; e.append(c.nodeType?c:document.createTextNode(c)); }
+  return e;
+}
+
+function render(){
+  const root=document.getElementById('root'); root.innerHTML='';
+  for(const sec of SECTIONS){
+    root.append(el('h2',{},sec.title));
+    for(const it of sec.items){
+      const st=state[it.id]||{};
+      const card=el('div',{class:'card'+(st.k?' done':'')});
+      card.append(el('p',{class:'q'},it.q), el('p',{class:'ctx'},it.ctx||''));
+      const opts=el('div',{class:'opts'});
+      for(const o of it.opts){
+        const b=el('button',{class:'opt','aria-pressed':String(st.k===o.k),type:'button',onclick:()=>{
+          state[it.id]=state[it.id]||{};
+          state[it.id].k = (state[it.id].k===o.k)?null:o.k;
+          save(); render(); update();
+        }});
+        const t=el('span',{class:'t'},o.t);
+        if(o.rec) t.append(el('span',{class:'tag rec'},'推奨'));
+        b.append(t);
+        if(o.d) b.append(el('span',{class:'d'},o.d));
+        if(o.s) b.append(el('span',{class:'s'},o.s));
+        opts.append(b);
+      }
+      card.append(opts);
+      const memo=el('textarea',{class:'memo',placeholder:'メモ（任意。例：この案の「〜」だけ採用、など）'});
+      memo.value=st.m||'';
+      memo.addEventListener('input',()=>{ state[it.id]=state[it.id]||{}; state[it.id].m=memo.value; save(); update(); });
+      card.append(memo);
+      root.append(card);
+    }
+  }
+}
+
+function labelOf(it,k){ const o=it.opts.find(x=>x.k===k); return o?o.t:'(未選択)'; }
+function result(){
+  const lines=['【第1話 r2 判断結果】'];
+  for(const sec of SECTIONS){
+    lines.push('', '■ '+sec.title);
+    for(const it of sec.items){
+      const st=state[it.id]||{};
+      let line=it.id+'：'+(st.k?labelOf(it,st.k):'(未選択)');
+      if(st.m && st.m.trim()) line+='　メモ：'+st.m.trim().replace(/\n/g,' ');
+      lines.push(line);
+    }
+  }
+  return lines.join('\n');
+}
+function update(){
+  const done=items.filter(i=>state[i.id]&&state[i.id].k).length;
+  document.getElementById('prog').textContent='選択済み '+done+' / '+items.length;
+  document.getElementById('out').value=result();
+  document.querySelectorAll('.card').forEach((c,i)=>{});
+}
+document.getElementById('btnRec').addEventListener('click',()=>{
+  for(const it of items){
+    const st=state[it.id]=state[it.id]||{};
+    if(!st.k){ const r=it.opts.find(o=>o.rec); if(r) st.k=r.k; }
+  }
+  save(); render(); update();
+});
+document.getElementById('btnClear').addEventListener('click',()=>{
+  if(!confirm('選択とメモをすべて消します。よろしいですか？')) return;
+  state={}; save(); render(); update();
+});
+document.getElementById('btnCopy').addEventListener('click',async()=>{
+  const out=document.getElementById('out'); const msg=document.getElementById('msg');
+  out.value=result();
+  try{
+    await navigator.clipboard.writeText(out.value);
+    msg.textContent='コピーしました。チャットに貼ってください。';
+  }catch(e){
+    out.removeAttribute('readonly'); out.focus(); out.select();
+    msg.textContent='自動コピーできませんでした。選択済みの文字を、コピーして貼ってください。';
+  }
+});
+render(); update();
+</script>
+</body>
+</html>

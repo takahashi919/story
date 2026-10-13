@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第1話 r1 調停の確認シート</title>
+<style>
+:root{
+  --bg:#f6f5f2; --card:#ffffff; --ink:#1c1b1a; --sub:#6a6761; --line:#dcd9d2;
+  --accent:#1f5f8b; --accent-ink:#ffffff; --ok:#2f7d4f; --rec:#b7791f; --soft:#eef3f7;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#17171a; --card:#212126; --ink:#ecebe8; --sub:#a09d96; --line:#3a3a42;
+    --accent:#5aa3d6; --accent-ink:#0d1a24; --ok:#62c08a; --rec:#e0b055; --soft:#262c33; }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.7 system-ui,-apple-system,"Hiragino Sans","Noto Sans JP",sans-serif}
+header{padding:20px 16px 8px;max-width:820px;margin:0 auto}
+h1{font-size:20px;margin:0 0 6px}
+h2{font-size:17px;margin:28px 0 10px;padding-top:6px;border-top:1px solid var(--line)}
+.lead{color:var(--sub);font-size:14px;margin:0}
+main{max-width:820px;margin:0 auto;padding:0 16px 220px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 14px 12px;margin:12px 0}
+.card.done{border-color:var(--ok)}
+.q{font-weight:700;margin:0 0 2px}
+.ctx{color:var(--sub);font-size:14px;margin:0 0 10px}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opt{border:1px solid var(--line);border-radius:10px;background:transparent;color:inherit;text-align:left;padding:10px 12px;cursor:pointer;font:inherit;width:100%}
+.opt:hover{background:var(--soft)}
+.opt[aria-pressed="true"]{border-color:var(--accent);background:var(--soft);box-shadow:inset 0 0 0 1px var(--accent)}
+.opt .t{font-weight:600}
+.opt .d{display:block;color:var(--sub);font-size:14px;margin-top:2px}
+.opt .s{display:block;font-size:14px;margin-top:6px;padding:8px 10px;border-left:3px solid var(--line);background:var(--bg);white-space:pre-wrap}
+.tag{display:inline-block;font-size:12px;border-radius:99px;padding:0 8px;margin-left:6px;vertical-align:1px}
+.tag.rec{background:var(--rec);color:#1a1200}
+.memo{width:100%;margin-top:8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:inherit;padding:8px;font:inherit;font-size:14px;min-height:38px}
+.bar{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:10px 16px;z-index:5}
+.bar .in{max-width:820px;margin:0 auto}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{border:1px solid var(--line);background:var(--card);color:inherit;border-radius:10px;padding:8px 14px;cursor:pointer;font:inherit}
+.btn.main{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:700}
+.prog{font-size:14px;color:var(--sub);margin-right:auto}
+#out{width:100%;height:96px;margin-top:8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:inherit;padding:8px;font:13px/1.5 ui-monospace,Menlo,monospace}
+.note{font-size:13px;color:var(--sub);margin:6px 0 0}
+</style>
+</head>
+<body>
+<header>
+  <h1>第1話 r1 調停の確認シート</h1>
+  <p class="lead">齊藤の調停で『要確認』になった8項目です。選択肢を押すと選べます（もう一度押すと取り消し）。推奨は齊藤の見立てです。下のバーで結果を文字にして、チャットへ貼ってください。メモ欄は自由に使えます。調停の全文は調停_r1.pdf にあります。</p>
+</header>
+<main id="root"></main>
+
+<div class="bar"><div class="in">
+  <div class="row">
+    <span class="prog" id="prog"></span>
+    <button class="btn" id="btnRec">未選択を推奨で埋める</button>
+    <button class="btn" id="btnClear">全部クリア</button>
+    <button class="btn main" id="btnCopy">結果をコピー</button>
+  </div>
+  <textarea id="out" readonly placeholder="ここに結果が出ます。コピーできない場合は、ここを全選択して貼ってください。"></textarea>
+  <p class="note" id="msg"></p>
+</div></div>
+
+<script>
+const SECTIONS = [{"title": "確認が必要な8項目", "items": [{"id": "1", "q": "1　広間の場面の視点", "ctx": "第0話の広間の場面（博之の一人称）の続きです。皇の後に3人続くので、皇の視点だと去った後を書けません。", "opts": [{"k": "A", "t": "博之の一人称", "d": "傷が裂ける、腕が痺れる、粒を数える癖。体の代償は一人称でしか出ない。皇の側の食い違いはS5（翌朝）で補う。", "rec": true}, {"k": "B", "t": "皇の三人称", "d": "皇が去った後の3人（投擲、拘束班、救護袋の男）が書けなくなる。"}, {"k": "C", "t": "皇のところだけ三人称、他は博之の一人称", "d": "場面の途中で視点が替わる。"}]}, {"id": "2", "q": "2　許可制の運用：『粒が四つ揃うまでに博之が答えなければ、エリスが実施する』（新設・仮）", "ctx": "第0話の『勝手にやるな。聞いてから』と、広間で杭が出ることを両立させる仕掛けです。博之は粒を数える癖があり、広間では四つ目まで数えてしまって間に合いません（博之の失敗）。陽子の場面では三つ目の直後に『あれは飯だ』と言えます。第3話の『合図』は先取りしません。", "opts": [{"k": "A", "t": "採る", "d": "エリスの台詞は『応答がありません。待機を終了します』の一行だけ。規則は本文で説明しない。", "rec": true}, {"k": "B", "t": "採らない（緊急時は許可を待たない例外にする）", "d": "許可制に例外が付く。"}]}, {"id": "3", "q": "3　善意の接近者（救護袋を提げた男）を4人目に入れるか", "ctx": "ご指示は『悪意や害意』でした。善意の男を入れると、エリスが敵意なしでも許可を求める形になり、『分からんものに近づくな』が全員に効きます。博之は男を突き飛ばして追い返します（偽悪）。", "opts": [{"k": "A", "t": "入れる", "d": "広間の悪意3人＋善意1人。第1話冒頭の『誰も巻こうとは言わなかった』の理由も、ここで物語として回収できる。", "rec": true}, {"k": "B", "t": "入れない（悪意3人で止める）"}]}, {"id": "4", "q": "4　成瀬が広間の素材を握りつぶしたことを、皇が知るか", "opts": [{"k": "A", "t": "本話では知らせない", "rec": true}, {"k": "B", "t": "S5で皇が気づく"}]}, {"id": "5", "q": "5　『広場』か『広間』か", "ctx": "第0話の本文は『広間』です。", "opts": [{"k": "A", "t": "本文・canon とも『広間』で統一", "rec": true}, {"k": "B", "t": "『広場』に統一し、第0話も直す"}]}, {"id": "6", "q": "6　広間の拡声器の声の主", "ctx": "『黒田。その個体を連れて、指定の部屋へ移動しろ』と言う声です。", "opts": [{"k": "A", "t": "第1話の尋問に出る無名の将校", "d": "条文を読む平たい声と同じ。斑鳩の初登場は夜明けのままにできる。", "rec": true}, {"k": "B", "t": "斑鳩", "d": "斑鳩の初登場が広間に前倒しになる。"}]}, {"id": "7", "q": "7　斑鳩の『今日の記録は、俺が見るまで誰にも渡すな』と、成瀬が落とす広間の素材", "ctx": "第0話で斑鳩が言った『記録』は作戦記録。成瀬が落とすのは報道班の素材。同じにすると、第4話で決める『記録の中身』を先に決めてしまいます。", "opts": [{"k": "A", "t": "別物にする", "d": "成瀬の電話に『作戦記録のほうは、斑鳩教官のところで止まっています』『要らん。映像だけでいい』の三行を入れ、摩擦だけ一行見せる。", "rec": true}, {"k": "B", "t": "広間の記録も斑鳩の『今日の記録』に含める"}]}, {"id": "8", "q": "8　皇の手袋の裂け目（縫った跡）を第2話以降も残すか", "opts": [{"k": "A", "t": "S5の縫い跡の一行まで。以後は書かない", "rec": true}, {"k": "B", "t": "S5限り（縫い跡も書かない）"}]}]}];
+
+const STORE='tz1r1b-sheet-v1';
+let state={};
+try{ state=JSON.parse(localStorage.getItem(STORE)||'{}'); }catch(e){ state={}; }
+function save(){ try{ localStorage.setItem(STORE, JSON.stringify(state)); }catch(e){} }
+const items=SECTIONS.flatMap(s=>s.items);
+
+function el(tag,attrs,...kids){
+  const e=document.createElement(tag);
+  for(const k in (attrs||{})){
+    if(k==='class') e.className=attrs[k];
+    else if(k.startsWith('on')) e.addEventListener(k.slice(2),attrs[k]);
+    else e.setAttribute(k,attrs[k]);
+  }
+  for(const c of kids){ if(c==null) continue; e.append(c.nodeType?c:document.createTextNode(c)); }
+  return e;
+}
+
+function render(){
+  const root=document.getElementById('root'); root.innerHTML='';
+  for(const sec of SECTIONS){
+    root.append(el('h2',{},sec.title));
+    for(const it of sec.items){
+      const st=state[it.id]||{};
+      const card=el('div',{class:'card'+(st.k?' done':'')});
+      card.append(el('p',{class:'q'},it.q), el('p',{class:'ctx'},it.ctx||''));
+      const opts=el('div',{class:'opts'});
+      for(const o of it.opts){
+        const b=el('button',{class:'opt','aria-pressed':String(st.k===o.k),type:'button',onclick:()=>{
+          state[it.id]=state[it.id]||{};
+          state[it.id].k = (state[it.id].k===o.k)?null:o.k;
+          save(); render(); update();
+        }});
+        const t=el('span',{class:'t'},o.t);
+        if(o.rec) t.append(el('span',{class:'tag rec'},'推奨'));
+        b.append(t);
+        if(o.d) b.append(el('span',{class:'d'},o.d));
+        if(o.s) b.append(el('span',{class:'s'},o.s));
+        opts.append(b);
+      }
+      card.append(opts);
+      const memo=el('textarea',{class:'memo',placeholder:'メモ（任意。例：この案の「〜」だけ採用、など）'});
+      memo.value=st.m||'';
+      memo.addEventListener('input',()=>{ state[it.id]=state[it.id]||{}; state[it.id].m=memo.value; save(); update(); });
+      card.append(memo);
+      root.append(card);
+    }
+  }
+}
+
+function labelOf(it,k){ const o=it.opts.find(x=>x.k===k); return o?o.t:'(未選択)'; }
+function result(){
+  const lines=['【第1話 r1 調停の確認結果】'];
+  for(const sec of SECTIONS){
+    lines.push('', '■ '+sec.title);
+    for(const it of sec.items){
+      const st=state[it.id]||{};
+      let line=it.id+'：'+(st.k?labelOf(it,st.k):'(未選択)');
+      if(st.m && st.m.trim()) line+='　メモ：'+st.m.trim().replace(/\n/g,' ');
+      lines.push(line);
+    }
+  }
+  return lines.join('\n');
+}
+function update(){
+  const done=items.filter(i=>state[i.id]&&state[i.id].k).length;
+  document.getElementById('prog').textContent='選択済み '+done+' / '+items.length;
+  document.getElementById('out').value=result();
+  document.querySelectorAll('.card').forEach((c,i)=>{});
+}
+document.getElementById('btnRec').addEventListener('click',()=>{
+  for(const it of items){
+    const st=state[it.id]=state[it.id]||{};
+    if(!st.k){ const r=it.opts.find(o=>o.rec); if(r) st.k=r.k; }
+  }
+  save(); render(); update();
+});
+document.getElementById('btnClear').addEventListener('click',()=>{
+  if(!confirm('選択とメモをすべて消します。よろしいですか？')) return;
+  state={}; save(); render(); update();
+});
+document.getElementById('btnCopy').addEventListener('click',async()=>{
+  const out=document.getElementById('out'); const msg=document.getElementById('msg');
+  out.value=result();
+  try{
+    await navigator.clipboard.writeText(out.value);
+    msg.textContent='コピーしました。チャットに貼ってください。';
+  }catch(e){
+    out.removeAttribute('readonly'); out.focus(); out.select();
+    msg.textContent='自動コピーできませんでした。選択済みの文字を、コピーして貼ってください。';
+  }
+});
+render(); update();
+</script>
+</body>
+</html>

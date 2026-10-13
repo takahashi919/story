@@ -25,7 +25,7 @@ description: 『報復のツァラトゥストラ』の第N話について、三
 ## ② 回答（オーナー）
 
 - 提案の要点をオーナーに見せる。各案は1〜2行で、Before → After の一節は添える。全文は `提案_rK.md` にあると伝える。
-- AskUserQuestion で聞く：
+- 判断が4つ以上ある時は、HTML の判断シート（`harness/tools/make_sheet.py`、形は `harness/templates/判断シート_例.json`）で出し、結果の文字をチャットに貼ってもらう。本文や提案は PDF（`harness/tools/make_pdf.py`）で渡す。3つ以下は AskUserQuestion で聞く：
   - 「三嶋案のうち採用するもの」（multiSelect。選択肢は案ごと）
   - 「孫の手案のうち採用するもの」（multiSelect）
   - 自案や「一部だけ採用」は Other で書いてもらう。チャットで自由に答えてもらってもよい。

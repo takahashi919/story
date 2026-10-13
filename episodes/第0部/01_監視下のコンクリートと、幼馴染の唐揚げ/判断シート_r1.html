@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第1話 r1 判断シート</title>
+<style>
+:root{
+  --bg:#f6f5f2; --card:#ffffff; --ink:#1c1b1a; --sub:#6a6761; --line:#dcd9d2;
+  --accent:#1f5f8b; --accent-ink:#ffffff; --ok:#2f7d4f; --rec:#b7791f; --soft:#eef3f7;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#17171a; --card:#212126; --ink:#ecebe8; --sub:#a09d96; --line:#3a3a42;
+    --accent:#5aa3d6; --accent-ink:#0d1a24; --ok:#62c08a; --rec:#e0b055; --soft:#262c33; }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.7 system-ui,-apple-system,"Hiragino Sans","Noto Sans JP",sans-serif}
+header{padding:20px 16px 8px;max-width:820px;margin:0 auto}
+h1{font-size:20px;margin:0 0 6px}
+h2{font-size:17px;margin:28px 0 10px;padding-top:6px;border-top:1px solid var(--line)}
+.lead{color:var(--sub);font-size:14px;margin:0}
+main{max-width:820px;margin:0 auto;padding:0 16px 220px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 14px 12px;margin:12px 0}
+.card.done{border-color:var(--ok)}
+.q{font-weight:700;margin:0 0 2px}
+.ctx{color:var(--sub);font-size:14px;margin:0 0 10px}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opt{border:1px solid var(--line);border-radius:10px;background:transparent;color:inherit;text-align:left;padding:10px 12px;cursor:pointer;font:inherit;width:100%}
+.opt:hover{background:var(--soft)}
+.opt[aria-pressed="true"]{border-color:var(--accent);background:var(--soft);box-shadow:inset 0 0 0 1px var(--accent)}
+.opt .t{font-weight:600}
+.opt .d{display:block;color:var(--sub);font-size:14px;margin-top:2px}
+.opt .s{display:block;font-size:14px;margin-top:6px;padding:8px 10px;border-left:3px solid var(--line);background:var(--bg);white-space:pre-wrap}
+.tag{display:inline-block;font-size:12px;border-radius:99px;padding:0 8px;margin-left:6px;vertical-align:1px}
+.tag.rec{background:var(--rec);color:#1a1200}
+.memo{width:100%;margin-top:8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:inherit;padding:8px;font:inherit;font-size:14px;min-height:38px}
+.bar{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:10px 16px;z-index:5}
+.bar .in{max-width:820px;margin:0 auto}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{border:1px solid var(--line);background:var(--card);color:inherit;border-radius:10px;padding:8px 14px;cursor:pointer;font:inherit}
+.btn.main{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:700}
+.prog{font-size:14px;color:var(--sub);margin-right:auto}
+#out{width:100%;height:96px;margin-top:8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:inherit;padding:8px;font:13px/1.5 ui-monospace,Menlo,monospace}
+.note{font-size:13px;color:var(--sub);margin:6px 0 0}
+</style>
+</head>
+<body>
+<header>
+  <h1>第1話 r1 判断シート</h1>
+  <p class="lead">選択肢を押すと選べます（もう一度押すと取り消し）。推奨は三人の見立てです。すでに決まっていること（観測ログは明け方／スメラギは少女の仕業とあたりをつける／スメラギ接近の新場面を足す／陽子への判定は深層の敵意を拾った結果（仮）／ランプは録画の表示に直す）は聞きません。下のバーで結果を文字にして、そのままチャットへ貼ってください。メモ欄は自由に使えます。提案の全文は提案_r1.pdf にあります。</p>
+</header>
+<main id="root"></main>
+
+<div class="bar"><div class="in">
+  <div class="row">
+    <span class="prog" id="prog"></span>
+    <button class="btn" id="btnRec">未選択を推奨で埋める</button>
+    <button class="btn" id="btnClear">全部クリア</button>
+    <button class="btn main" id="btnCopy">結果をコピー</button>
+  </div>
+  <textarea id="out" readonly placeholder="ここに結果が出ます。コピーできない場合は、ここを全選択して貼ってください。"></textarea>
+  <p class="note" id="msg"></p>
+</div></div>
+
+<script>
+const SECTIONS = [{"title": "A. 新場面（スメラギが接近→エリスが攻撃→博之が止めて突き放す）", "items": [{"id": "A1", "q": "A1　新場面の視点", "ctx": "観測ログのあと、第4監視棟へ移される途中の渡り廊下（夕方、約700字）。三嶋と孫の手で割れました。折衷案は私（進行役）の案です。", "opts": [{"k": "mishima", "t": "三嶋案：三人称（スメラギ）", "d": "博之の突き放しが、読者には『怖がっている男の言葉』、スメラギには『ただの侮り』に見える二重構造。スメラギが杭の断面から『少女の仕業』とあたりをつける所も、この場面の中で書ける。", "s": "少女の瞳が、赤黒く濁った。\n「低級な殺意を確認。排除します」\n足元の路面が割れ、黒い杭が突き上がった。右手の甲をかすめ、鍔を弾く。白い手袋の指先が裂けて、黒い線が一本、遅れて赤くなった。\n「止めろ」\n黒田の左手が、少女の手首をつかんでいた。包帯の端が、白く食い込んでいる。"}, {"k": "magonote", "t": "孫の手案：一人称（博之）", "d": "『待て』が一拍遅れ、左手の傷が裂けて包帯の内側が湿る。体で代償を払う場面になり、翌朝の陽子の『結び目がまだ湿っている』につながる。二重構造は失う。", "s": "遅かった。左手を後ろへ伸ばした。包帯越しに、冷たいものが指に触れた。骨の中で何かが回っている。掌の傷が裂けて、布の内側がぬるくなった。"}, {"k": "both", "t": "折衷：三人称（スメラギ）＋博之の体の代償は、スメラギの目に映る物で拾う", "d": "傷が開いて包帯に滲む赤、手首をつかむ指の白さ、肘まで震える腕を、スメラギが見る。二重構造と体の代償の両方を取る。", "rec": true}, {"k": "no", "t": "新場面を足さない", "d": "オーナーの回答（新場面を足す）を取り下げる場合。"}]}, {"id": "A2", "q": "A2　博之の突き放しの台詞", "ctx": "『よく分からんから近づくな』型。メモ欄に自案を書いてもよいです。", "opts": [{"k": "mA", "t": "三嶋A：「どこまでが近づくのか、俺にも分からん。だから全部だ。寄るな、王子様」", "d": "『全部』が、エリスの『とりあえず近づく者は撃つ』の学習の入口になる。『王子様』で偽悪が立つ。", "rec": true}, {"k": "mB", "t": "三嶋B：「見物なら外でやれ。こいつが何で撃つのか、俺も知らん」", "d": "偽悪は強いが、『よく分からん』が弱くなる。"}, {"k": "gC", "t": "孫の手／三嶋C：「よく分からん。分からんものに、近づくな」", "d": "最短。博之は説明も謝罪もしない。皮肉は足りない。"}, {"k": "own", "t": "自案（メモ欄に書く）"}]}, {"id": "A3", "q": "A3　スメラギの受ける傷と、博之の動き", "ctx": "炭化はさせない（研究員の場面と同じ見せ場にしないため）。", "opts": [{"k": "scratch", "t": "三嶋案：杭が右手の甲をかすめ、手袋の指先が裂ける", "d": "博之はエリスの手首を止めるだけ。『聞いてから、だ』『了解しました』で第0話の許可制を保つ。", "rec": true}, {"k": "push", "t": "孫の手案：博之がスメラギの胸を押し、手袋の指先が縮んで黒く丸まる", "d": "冷たい黒と熱い白の対比。指先の損傷が残るので、第2話以降も手袋の指先をどうするか決める必要がある。"}, {"k": "none", "t": "傷なし（杭が足元をかすめるだけ）"}]}, {"id": "A4", "q": "A4　成瀬が渡り廊下の録画を握りつぶす（S4）", "ctx": "三嶋案3。A1 で新場面を足すなら成立します。皇は隠蔽を知らない前提。博之が皇を救った事実と爆撃を避けた事実が、報道からも記録からも消える。", "opts": [{"k": "yes", "t": "採用", "d": "指示を二本立てにする：『今夕の渡り廊下は、記録ごと消せ。皇が抜きかけた事実はない』と『昨夜の映像だ。黒田の映った部分は、すべて切れ』。", "rec": true}, {"k": "no", "t": "不採用（S4 は今のまま）"}]}, {"id": "A5", "q": "A5　エリスの観測ログを、新場面のあとにもう一つ足す", "ctx": "今のログは明け方（炭化の直後）なので、夕方の学習は書けません。2〜3行の短いログを新場面の直後に置けば、エリスの内側から『近づく者は撃つ』の学習を、感情語なしで見せられます。", "opts": [{"k": "add", "t": "足す（2〜3行）", "d": "例：規則更新：接近する個体＝敵意候補／例外：マスターの許可", "s": "【観測ログ 1980/05/05 17:48　対象：マスター（黒田博之）】\n・接近個体：登録外1名　敵意の有無：不明　排除実行：未遂（マスターの停止）\n・規則更新：接近する個体は、敵意の有無によらず排除候補とする。例外：マスターの許可", "rec": true}, {"k": "no", "t": "足さない（ログは明け方の一つだけ）"}]}]}, {"title": "B. 赤いランプと陽子の場面", "items": [{"id": "B1", "q": "B1　ランプの表現の直し方", "ctx": "二人とも『録画の点』に直す点で一致。直す行は 119・133・213・227・247・291 行目です。", "opts": [{"k": "mishima", "t": "三嶋案：赤い点とレンズを分ける", "d": "S3 で『四隅の赤い点の下に、黒いレンズが一つずつ。点きっぱなしで、音がしない』と一度だけ言う。S6 で視線の対象はレンズか天井。227 は『三つ数えるあいだ、陽子は退かなかった』に。"}, {"k": "magonote", "t": "孫の手案：動かない点にして、数える対象を床の黒い粒に替える", "d": "S4 成瀬の場面にも『モニターの隅に録画中の赤い点が四つ揃って点いている』と一行足す。"}, {"k": "both", "t": "両方組む（レンズに分ける＋成瀬の画面の一行＋数える対象は粒）", "rec": true}]}, {"id": "B2", "q": "B2　エリスの陽子への判定を、どう示すか", "ctx": "決定ログでは『陽子の深層の敵意を拾った結果（仮）』。陽子は何も出さず、博之にも解釈させない前提です。", "opts": [{"k": "line", "t": "三嶋案：エリスの台詞に『敵意を検知しました』を入れる", "d": "新しい表示書式が要らない。読者は『エリスの誤判定か、陽子が隠しているのか』と引っかかる。", "s": "「接近を検知。登録外の個体です。敵意を検知しました。排除は、許可後に実施しますか」", "rec": true}, {"k": "disp", "t": "孫の手案：博之の視界に出る表示に一行足す", "d": "『【付随検知：対象に、対エリス敵意あり（深層）】』。表示の書式が一つ増える（canon に追加が要る）。"}, {"k": "none", "t": "示さない（黒い粒が先に起きる順序だけ）", "d": "読者は理由に気づかない。後で回収する余地は最大。"}]}, {"id": "B3", "q": "B3　陽子の包帯の巻き方：一周目だけきつい", "ctx": "孫の手案3。敵意を言わせず、手の力加減で陽子の中の矛盾を見せる。『きつくも、緩くもない』は削る。", "opts": [{"k": "yes", "t": "採用", "s": "新しい包帯が、手首へ向けて斜めに巻かれていく。一周目だけ、きつかった。傷の縁が脈を打った。二周目で、緩んだ。陽子は顔を上げなかった。", "rec": true}, {"k": "no", "t": "不採用（今のまま）"}]}]}, {"title": "C. そのほか", "items": [{"id": "C1", "q": "C1　第4監視棟の夜（S3）を、体の不快で満たす", "ctx": "孫の手案2。研究員の髪を焼いた匂いが袖に残り、水でこすっても取れない。眠らない夜に空腹とナイフを落とす音を足す。ジャケットを剥ぐ一行も入る。博之の内心は言葉にしない。", "opts": [{"k": "yes", "t": "採用", "s": "椅子に座り、ナイフを膝に置いた。袖口から、髪を焼いた匂いがまだ上がってくる。壁の継ぎ目に滲んだ水を右手で掬って、こすった。落ちなかった。三度こすって、やめた。", "rec": true}, {"k": "no", "t": "不採用（今のまま）"}]}, {"id": "C2", "q": "C2　字数の調整（新場面で約+700字。5,000字以内に収める）", "ctx": "削る候補：S1 将校の往復を畳む／S4『尺が足りなくなります』／S5 背後の声／S6『着方を教える暇があるか』と袖を折る手前のやりとり／S6『言わないのが、こいつのやり方だ』／S3 のシャツとジャケットを一続きに。『エリスです』は残す。", "opts": [{"k": "all", "t": "二人の提案どおり畳む", "rec": true}, {"k": "partial", "t": "一部だけ（メモ欄に、残したい所を書く）"}, {"k": "over", "t": "5,000字を少し超えてもよい（上限を調停で決める）"}]}]}];
+
+const STORE='tz1r1-sheet-v1';
+let state={};
+try{ state=JSON.parse(localStorage.getItem(STORE)||'{}'); }catch(e){ state={}; }
+function save(){ try{ localStorage.setItem(STORE, JSON.stringify(state)); }catch(e){} }
+const items=SECTIONS.flatMap(s=>s.items);
+
+function el(tag,attrs,...kids){
+  const e=document.createElement(tag);
+  for(const k in (attrs||{})){
+    if(k==='class') e.className=attrs[k];
+    else if(k.startsWith('on')) e.addEventListener(k.slice(2),attrs[k]);
+    else e.setAttribute(k,attrs[k]);
+  }
+  for(const c of kids){ if(c==null) continue; e.append(c.nodeType?c:document.createTextNode(c)); }
+  return e;
+}
+
+function render(){
+  const root=document.getElementById('root'); root.innerHTML='';
+  for(const sec of SECTIONS){
+    root.append(el('h2',{},sec.title));
+    for(const it of sec.items){
+      const st=state[it.id]||{};
+      const card=el('div',{class:'card'+(st.k?' done':'')});
+      card.append(el('p',{class:'q'},it.q), el('p',{class:'ctx'},it.ctx||''));
+      const opts=el('div',{class:'opts'});
+      for(const o of it.opts){
+        const b=el('button',{class:'opt','aria-pressed':String(st.k===o.k),type:'button',onclick:()=>{
+          state[it.id]=state[it.id]||{};
+          state[it.id].k = (state[it.id].k===o.k)?null:o.k;
+          save(); render(); update();
+        }});
+        const t=el('span',{class:'t'},o.t);
+        if(o.rec) t.append(el('span',{class:'tag rec'},'推奨'));
+        b.append(t);
+        if(o.d) b.append(el('span',{class:'d'},o.d));
+        if(o.s) b.append(el('span',{class:'s'},o.s));
+        opts.append(b);
+      }
+      card.append(opts);
+      const memo=el('textarea',{class:'memo',placeholder:'メモ（任意。例：この案の「〜」だけ採用、など）'});
+      memo.value=st.m||'';
+      memo.addEventListener('input',()=>{ state[it.id]=state[it.id]||{}; state[it.id].m=memo.value; save(); update(); });
+      card.append(memo);
+      root.append(card);
+    }
+  }
+}
+
+function labelOf(it,k){ const o=it.opts.find(x=>x.k===k); return o?o.t:'(未選択)'; }
+function result(){
+  const lines=['【第1話 r1 判断結果】'];
+  for(const sec of SECTIONS){
+    lines.push('', '■ '+sec.title);
+    for(const it of sec.items){
+      const st=state[it.id]||{};
+      let line=it.id+'：'+(st.k?labelOf(it,st.k):'(未選択)');
+      if(st.m && st.m.trim()) line+='　メモ：'+st.m.trim().replace(/\n/g,' ');
+      lines.push(line);
+    }
+  }
+  return lines.join('\n');
+}
+function update(){
+  const done=items.filter(i=>state[i.id]&&state[i.id].k).length;
+  document.getElementById('prog').textContent='選択済み '+done+' / '+items.length;
+  document.getElementById('out').value=result();
+  document.querySelectorAll('.card').forEach((c,i)=>{});
+}
+document.getElementById('btnRec').addEventListener('click',()=>{
+  for(const it of items){
+    const st=state[it.id]=state[it.id]||{};
+    if(!st.k){ const r=it.opts.find(o=>o.rec); if(r) st.k=r.k; }
+  }
+  save(); render(); update();
+});
+document.getElementById('btnClear').addEventListener('click',()=>{
+  if(!confirm('選択とメモをすべて消します。よろしいですか？')) return;
+  state={}; save(); render(); update();
+});
+document.getElementById('btnCopy').addEventListener('click',async()=>{
+  const out=document.getElementById('out'); const msg=document.getElementById('msg');
+  out.value=result();
+  try{
+    await navigator.clipboard.writeText(out.value);
+    msg.textContent='コピーしました。チャットに貼ってください。';
+  }catch(e){
+    out.removeAttribute('readonly'); out.focus(); out.select();
+    msg.textContent='自動コピーできませんでした。選択済みの文字を、コピーして貼ってください。';
+  }
+});
+render(); update();
+</script>
+</body>
+</html>
